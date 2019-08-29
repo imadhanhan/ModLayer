@@ -345,7 +345,7 @@ ylim = get(handles.axes1, 'YLim'); %get y-axes of left image
 
 set(hObject,'string','Modify ON','ForegroundColor','green'); %Make Modify OFf -> Modify ON in green
 
-image=data_modify(:,:,z2); %save the image for imposing mask
+
 
 axes_number=get(handles.popupmenu3,'Value'); %pop menu value for drawing on the left ir right image
 
@@ -360,9 +360,17 @@ end
 % Once drawing is done (click is released)
 mask = hFH.createMask(); %create a mask from the drawing
 
-% Get value to impose on mask:
+% Get value to impose on mask from user input:
+image=data_modify(:,:,z2); %save the image for imposing mask
 string_value_to_impose=get(handles.edit1,'String'); %the segmentation value to impose on the image
 image(mask)=str2double(string_value_to_impose); %Update segmentation value on image
+
+% % DO NOT CHANGE: Get value to impose on mask from left image:
+% data1=handles.data1;%get data1
+% image_left=data1(:,:,z2); %store left image data1
+% image=data_modify(:,:,z2); %store the image for imposing mask (right)
+% string_value_to_impose=image_left(find(mask==1)); %get intensity from left image at draw region
+% image(find(mask==1))=string_value_to_impose; %Update segmentation value on right image
 
 data_modify(:,:,z2)=image; %update slice with the modifief image
 

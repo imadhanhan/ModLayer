@@ -1,4 +1,7 @@
 % ModLayer(raw3Dstack)
+% Imad Hanhan and Michael D. Sangid. August, 2019. Purdue University.
+% ModLayer: A MATLAB GUI Drawing Segmentation Tool for Visualizing and Classifying 3D Data
+%
 % ModLayer is a tool that allows for slice-by-slice Visualization of two 3D
 % datasets. A global variable called data_modify must be instantiated in
 % the workspace and must have the same size as raw3Dstack.
@@ -7,6 +10,9 @@
 %               global data_modify;
 %               data_modify=processed3Dstacked;
 %               ModLayer(raw3Dstack)
+% If you use this tool and your work results in a publication, please cite as:
+% I. Hanhan, M.D. Sangid, ModLayer: A Matlab GUI Drawing Segmentation Tool for 
+% Classifying and Processing 3D Data, Submitt. under Rev. (2019).
 
 function varargout = ModLayer(varargin)
 % Begin initialization code - DO NOT EDIT

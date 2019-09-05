@@ -1,7 +1,7 @@
 clc
 
 disp('Reading in tomography data');
-tomo=h5read('sameple_composite_tomo.h5','/intensity'); %read in the tomo images
+tomo=h5read('sample_composite_tomo.h5','/intensity'); %read in the tomo images
 tomo=mat2gray(tomo); %scales tomo so intensity is from 0 to 1
 
 disp('Segmenting tomography data');
@@ -31,3 +31,5 @@ fibers=find(tomo>0.65); %find fibers
 data_modify(fibers)=1; %segment fibers as 1
 
 ModLayer(tomo) %initialize ModLayer
+
+

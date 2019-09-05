@@ -8,6 +8,8 @@ Instructions for download and installation:
 
 1) Download all contents and unzip.
 2) Copy and paste 'ModLayer.fig' and 'ModLayer.m' into your local directory in folder 'Documents/MATLAB'
-3) In a separate directory, run the example file to practice using ModLayer
+ModLayer is now installed and ready to be used while working in MATLAB in any directory.
+
+3) In a separate directory, copy and paste 'example_modlayer_script.m' and 'sample_composite_tomo.h5' and run the example script to practice using ModLayer
 
 ModLayer has been designed to work on MATLAB 2014 and later.

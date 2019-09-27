@@ -7,7 +7,7 @@ I. Hanhan, M.D. Sangid, ModLayer: A Matlab GUI Drawing Segmentation Tool for Cla
 Instructions for download and installation:
 
 1) Download all contents and unzip.
-2) Copy and paste 'ModLayer.fig' and 'ModLayer.m' into your local directory in folder 'Documents/MATLAB'
+2) Copy and paste 'ModLayer.fig' and 'ModLayer.m' into your local directory in folder 'Documents/MATLAB'.
 ModLayer is now installed and ready to be used while working in MATLAB in any directory.
 
 3) In a separate directory, copy and paste 'example_modlayer_script.m' and 'sample_composite_tomo.h5' and run the example script to practice using ModLayer

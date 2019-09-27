@@ -53,7 +53,13 @@ set(handles.togglebutton1,'string','Modify OFF','ForegroundColor','red'); %initi
 
 z=1; %intializes as slice = first slice for visualizaing both datasets
 
+handles.data1min=min(data1(:));
+handles.data2min=min(data_modify(:));
+handles.data1max=max(data1(:));
+handles.data2max=max(data_modify(:));
+
 imagesc(handles.axes1, data1(:,:,z)); %visualize data1
+caxis(  handles.axes1, [handles.data1min handles.data1max]);
 colormap(handles.axes1, 'gray') %set the colormap for data1 as gray
 
 % Custom Jet White colormap:
@@ -62,6 +68,7 @@ myColorMap(1,:) = 1; %set first value as white
 
 imagesc(handles.axes2, data_modify(:,:,z)); %asigns the second window data2
 colormap(handles.axes2, myColorMap) %sets the default colormap as jetwhite
+caxis(  handles.axes2, [handles.data2min handles.data2max]);
 
 % Set output objects
 handles.output = hObject;
@@ -131,6 +138,7 @@ data1=handles.data1;
 
 %plot image1 for data1
 imagesc(handles.axes1, data1(:,:,floor(z1))); %plot the desired slice
+caxis(  handles.axes1, [handles.data1min handles.data1max]);
 set(handles.edit2, 'String', num2str(floor(z1))); %set the slider text box to the slice
 if popmv1<18 %if using a default colormap
     colormap(handles.axes1, options{popmv1}); %set the colormap
@@ -147,6 +155,7 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
     set(handles.slider2, 'Value', z1); %srt the right slider to match left slider
     set(handles.edit3, 'String', num2str(floor(z1))); %srt left slider text to match layer
     imagesc(handles.axes2, data_modify(:,:,floor(z1))); %display the image
+    caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if user selected a default colormap
         colormap(handles.axes2, options{popmv2}); %set the colormap
     elseif popmv2==18 %is the user selected the custom colormap
@@ -194,6 +203,7 @@ ylim = get(handles.axes1, 'YLim'); %get the ylim from data1
 if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
     z2=get(handles.slider2,'Value'); %get the right slider value
     imagesc(handles.axes2, data_modify(:,:,floor(z2))); %set the data_modify image to the new layer
+    caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if default colormap choice
         colormap(handles.axes2, options{popmv2}); %set the colormap
     elseif popmv2==18 %if jetwhite colormap choice
@@ -206,6 +216,7 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
     data1=handles.data1;%get data1
     z2=get(handles.slider2,'Value'); %get the z location of the right slider
     imagesc(handles.axes1, data1(:,:,floor(z2)));
+    caxis(  handles.axes1, [handles.data1min handles.data1max]);
     if popmv1<18
         colormap(handles.axes1, options{popmv1}); %set the colormap for tomography
     elseif popmv1==18
@@ -214,6 +225,7 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
         colormap(handles.axes1,myColorMap); %set jetwhite as colormap
     end
     imagesc(handles.axes2, data_modify(:,:,floor(z2))); %display the selected slice of data_modify
+    caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if standard matlab colormap 
         colormap(handles.axes2, options{popmv2}); %set the colormap
     elseif popmv2==18 %if jetwhite is selected
@@ -274,6 +286,7 @@ options={'parula', 'jet', 'hsv', 'hot', 'cool', 'spring', 'summer', 'autumn', 'w
     'copper', 'pink', 'lines', 'colorcube', 'prism', 'flag', 'jetwhite'}; %colormap options
 
 imagesc(handles.axes2, data_modify(:,:,floor(z1))); %plot data_modify at matching slice on right image
+caxis(  handles.axes2, [handles.data2min handles.data2max]);
 if popmv2<18 %if standard matlab colormap
         colormap(handles.axes2, options{popmv2}); %set the colormap
     elseif popmv2==18 %if custom colormap
@@ -381,6 +394,16 @@ image(mask)=str2double(string_value_to_impose); %Update segmentation value on im
 data_modify(:,:,z2)=image; %update slice with the modifief image
 
 imagesc(handles.axes2, data_modify(:,:,floor(z2))); %display the updated image on data_modify
+caxis(  handles.axes2, [handles.data2min handles.data2max]);
+
+if popmv2<18 %if the colormap
+    colormap(handles.axes2, options{popmv2}); %set the colormap for tomography
+elseif popmv2==18
+    myColorMap = jet(256); %colormap used for indexing, where 0 is white
+    myColorMap(1,:) = 1;
+    colormap(handles.axes2,myColorMap); %set the colormap to jetwhite
+end
+
 if get(handles.checkbox1, 'Value') == 0 %if NOT linking xy axes
     linkaxes([handles.axes1,handles.axes2],'off')
 elseif get(handles.checkbox1, 'Value') == 1 %if  linking xy axes
@@ -391,13 +414,7 @@ elseif get(handles.checkbox1, 'Value') == 1 %if  linking xy axes
     linkaxes([handles.axes1,handles.axes2],'xy') %link the axes
 end
 
-if popmv2<18 %if the colormap
-    colormap(handles.axes2, options{popmv2}); %set the colormap for tomography
-elseif popmv2==18
-    myColorMap = jet(256); %colormap used for indexing, where 0 is white
-    myColorMap(1,:) = 1;
-    colormap(handles.axes2,myColorMap); %set the colormap to jetwhite
-end
+
 
 set(hObject,'string','Modify OFF','ForegroundColor','red'); %set text from Modify ON -> Modify OFF in red
 % end
@@ -505,6 +522,7 @@ data1=handles.data1; %bring in data1
 
 %plot image1
 imagesc(handles.axes1, data1(:,:,floor(z1)));
+caxis(  handles.axes1, [handles.data1min handles.data1max]);
 
 if popmv1<18 %if default colormap
     colormap(handles.axes1, options{popmv1}); %set the colormap
@@ -521,6 +539,7 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes, need to change t
     set(handles.slider2, 'Value', z1); %set the right slider value to match
     set(handles.edit3, 'String', num2str(floor(z1))); %set the right text box to match
     imagesc(handles.axes2, data_modify(:,:,floor(z1))); %show the right image at the matching slice
+    caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if default colormaps
         colormap(handles.axes2, options{popmv2}); %set the colormap
     elseif popmv2==18 %if custom colormap
@@ -558,6 +577,7 @@ set(handles.slider2, 'Value', floor(z2)); %set slide to the desired slice
 
 if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
     imagesc(handles.axes2, data_modify(:,:,floor(z2))); %update right image to the new slice
+    caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if default colormap option
         colormap(handles.axes2, options{popmv2}); %set the colormap
     elseif popmv2==18 %if custom colormap
@@ -569,6 +589,7 @@ if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
 elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
     data1=handles.data1; %bring in data1 left data
     imagesc(handles.axes1, data1(:,:,floor(z2))); %show left data at matching slice
+    caxis(  handles.axes1, [handles.data1min handles.data1max]);
     if popmv1<18 %if default colormaps
         colormap(handles.axes1, options{popmv1}); %set the colormap
     elseif popmv1==18 %if custom colormap
@@ -577,6 +598,7 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
         colormap(handles.axes1,myColorMap); %set colormap to jetwhite
     end
     imagesc(handles.axes2, data_modify(:,:,floor(z2))); %show right image at matching slice
+    caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if default colormap
         colormap(handles.axes2, options{popmv2}); %set the colormap
     elseif popmv2==18 %if custom colormap

@@ -57,6 +57,8 @@ handles.data1min=min(data1(:));
 handles.data2min=min(data_modify(:));
 handles.data1max=max(data1(:));
 handles.data2max=max(data_modify(:));
+handles.undoslicenumber=1;
+handles.undoslice=data_modify(:,:,1);
 
 imagesc(handles.axes1, data1(:,:,z)); %visualize data1
 caxis(  handles.axes1, [handles.data1min handles.data1max]);
@@ -101,6 +103,9 @@ set(handles.text10, 'String', num2str(1))%the text box for the min layer
 %Colormapr options
 set(handles.popupmenu1, 'Value', 10) %set the colormap option to 10, gray
 set(handles.popupmenu2, 'Value', 18) %set the colormap option to 18, JetWhite
+
+set(handles.pushbutton3,'Enable','off'); %undo button disabled
+% set(handles.pushbutton3, 'ForegroundColor','white'); %undo is not ready to go
 
 % Update handles structure
 guidata(hObject, handles);
@@ -362,9 +367,10 @@ z2=floor(get(handles.slider2,'Value')); %get slice number of data_modify
 xlim = get(handles.axes1, 'XLim'); %get x-axes of left image
 ylim = get(handles.axes1, 'YLim'); %get y-axes of left image
 
+handles.undoslicenumber=z2; %the slice number for undoing
+handles.undoslice=data_modify(:,:,z2); %the slice for undoing
+
 set(hObject,'string','Modify ON','ForegroundColor','green'); %Make Modify OFf -> Modify ON in green
-
-
 
 axes_number=get(handles.popupmenu3,'Value'); %pop menu value for drawing on the left ir right image
 
@@ -414,9 +420,11 @@ elseif get(handles.checkbox1, 'Value') == 1 %if  linking xy axes
     linkaxes([handles.axes1,handles.axes2],'xy') %link the axes
 end
 
-
-
+guidata(hObject,handles); %Update handles
 set(hObject,'string','Modify OFF','ForegroundColor','red'); %set text from Modify ON -> Modify OFF in red
+set(handles.pushbutton3,'Enable','on'); %undo button enabled
+% set(handles.pushbutton3, 'ForegroundColor', 'black'); %Make the button usable
+
 % end
 
 % --- Executes on selection change in popupmenu3.
@@ -620,3 +628,71 @@ elseif get(handles.checkbox1, 'Value') == 1 %if linking xy axes
     set(handles.axes2, 'YLim', ylim); %set y-axes of right image
     linkaxes([handles.axes1,handles.axes2],'xy') %ensure linking is on
 end
+
+
+% --- Executes on button press in pushbutton3.
+function pushbutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global data_modify
+z2=handles.undoslicenumber;
+data_modify(:,:,z2)=handles.undoslice;
+set(hObject,'Enable','off'); %undo button disabled
+% The rest of the script will re-update the image
+popmv1=get(handles.popupmenu1,'Value'); %get left colormap choice
+popmv2=get(handles.popupmenu2,'Value'); %get right colormap choice
+options={'parula', 'jet', 'hsv', 'hot', 'cool', 'spring', 'summer', 'autumn', 'winter', 'gray', 'bone', ... 
+    'copper', 'pink', 'lines', 'colorcube', 'prism', 'flag', 'jetwhite'}; %colormap options
+
+xlim = get(handles.axes1, 'XLim'); %get left xlim
+ylim = get(handles.axes1, 'YLim'); %get right xlim
+
+set(handles.slider2, 'Value', floor(z2)); %set slide to the desired slice   
+
+if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
+    imagesc(handles.axes2, data_modify(:,:,floor(z2))); %update right image to the new slice
+    caxis(  handles.axes2, [handles.data2min handles.data2max]);
+    if popmv2<18 %if default colormap option
+        colormap(handles.axes2, options{popmv2}); %set the colormap
+    elseif popmv2==18 %if custom colormap
+        myColorMap = jet(256); %colormap used for indexing, where 0 is white
+        myColorMap(1,:) = 1;
+        colormap(handles.axes2,myColorMap); %set jet-white colormap
+    end
+
+elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
+    data1=handles.data1; %bring in data1 left data
+    imagesc(handles.axes1, data1(:,:,floor(z2))); %show left data at matching slice
+    caxis(  handles.axes1, [handles.data1min handles.data1max]);
+    if popmv1<18 %if default colormaps
+        colormap(handles.axes1, options{popmv1}); %set the colormap
+    elseif popmv1==18 %if custom colormap
+        myColorMap = jet(256); %colormap used for indexing, where 0 is white
+        myColorMap(1,:) = 1;
+        colormap(handles.axes1,myColorMap); %set colormap to jetwhite
+    end
+    imagesc(handles.axes2, data_modify(:,:,floor(z2))); %show right image at matching slice
+    caxis(  handles.axes2, [handles.data2min handles.data2max]);
+    if popmv2<18 %if default colormap
+        colormap(handles.axes2, options{popmv2}); %set the colormap
+    elseif popmv2==18 %if custom colormap
+        myColorMap = jet(256); %colormap used for indexing, where 0 is white
+        myColorMap(1,:) = 1;
+        colormap(handles.axes2,myColorMap); %set jet-white
+    end
+    set(handles.edit2, 'String', num2str(floor(z2))); %set the left text box slice number
+    set(handles.edit3, 'String', num2str(floor(z2))); %set the righ text box slice number
+    set(handles.slider1, 'Value', floor(z2)); %set left slider value
+end
+
+if get(handles.checkbox1, 'Value') == 0 %if NOT linking xy axes
+    linkaxes([handles.axes1,handles.axes2],'off') %ensure linking is turning off
+elseif get(handles.checkbox1, 'Value') == 1 %if linking xy axes
+    set(handles.axes1, 'XLim', xlim); %set x-axes of left image
+    set(handles.axes1, 'YLim', ylim); %set y-axes of right image
+    set(handles.axes2, 'XLim', xlim); %set x-axes of left image
+    set(handles.axes2, 'YLim', ylim); %set y-axes of right image
+    linkaxes([handles.axes1,handles.axes2],'xy') %ensure linking is on
+end
+

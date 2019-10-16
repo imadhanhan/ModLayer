@@ -49,7 +49,8 @@ if size(data1)~=size(data_modify) %check that the sizes match
     warning('Size of 3D Stacked images does not match data_modify.') %warn the user
 end
 
-set(handles.togglebutton1,'string','Modify OFF','ForegroundColor','red'); %initialize toggle button to be off to start with
+set(handles.pushmodify,'string','MODIFY','ForegroundColor', [0.6350 0.0780 0.1840], 'TooltipString', 'Press `/` to modify'); %initialize toggle button to be off to start with
+set(handles.uipanel1,'ForegroundColor', [0.6350 0.0780 0.1840], 'ShadowColor',[0.6350 0.0780 0.1840] ); %change panel colors to red
 
 z=1; %intializes as slice = first slice for visualizaing both datasets
 
@@ -105,7 +106,8 @@ set(handles.popupmenu1, 'Value', 10) %set the colormap option to 10, gray
 set(handles.popupmenu2, 'Value', 18) %set the colormap option to 18, JetWhite
 
 set(handles.pushbutton3,'Enable','off'); %undo button disabled
-% set(handles.pushbutton3, 'ForegroundColor','white'); %undo is not ready to go
+
+handles.currentmodify=0; %user is not in the middle of continuous modification
 
 % Update handles structure
 guidata(hObject, handles);
@@ -142,9 +144,9 @@ ylim = get(handles.axes1, 'YLim'); %get the Y axes location (in case the user ha
 data1=handles.data1;
 
 %plot image1 for data1
-imagesc(handles.axes1, data1(:,:,floor(z1))); %plot the desired slice
+imagesc(handles.axes1, data1(:,:,uint8(z1))); %plot the desired slice
 caxis(  handles.axes1, [handles.data1min handles.data1max]);
-set(handles.edit2, 'String', num2str(floor(z1))); %set the slider text box to the slice
+set(handles.edit2, 'String', num2str(uint8(z1))); %set the slider text box to the slice
 if popmv1<18 %if using a default colormap
     colormap(handles.axes1, options{popmv1}); %set the colormap
 elseif popmv1==18 %is uing the custom colormap
@@ -158,8 +160,8 @@ if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
     %do nothing, user is only changing the left image
 elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
     set(handles.slider2, 'Value', z1); %srt the right slider to match left slider
-    set(handles.edit3, 'String', num2str(floor(z1))); %srt left slider text to match layer
-    imagesc(handles.axes2, data_modify(:,:,floor(z1))); %display the image
+    set(handles.edit3, 'String', num2str(uint8(z1))); %srt left slider text to match layer
+    imagesc(handles.axes2, data_modify(:,:,uint8(z1))); %display the image
     caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if user selected a default colormap
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -207,7 +209,7 @@ ylim = get(handles.axes1, 'YLim'); %get the ylim from data1
 
 if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
     z2=get(handles.slider2,'Value'); %get the right slider value
-    imagesc(handles.axes2, data_modify(:,:,floor(z2))); %set the data_modify image to the new layer
+    imagesc(handles.axes2, data_modify(:,:,uint8(z2))); %set the data_modify image to the new layer
     caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if default colormap choice
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -216,11 +218,11 @@ if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
         myColorMap(1,:) = 1;
         colormap(handles.axes2,myColorMap); %set jetwhite
     end
-    set(handles.edit3, 'String', num2str(floor(z2)));
+    set(handles.edit3, 'String', num2str(uint8(z2)));
 elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
     data1=handles.data1;%get data1
     z2=get(handles.slider2,'Value'); %get the z location of the right slider
-    imagesc(handles.axes1, data1(:,:,floor(z2)));
+    imagesc(handles.axes1, data1(:,:,uint8(z2)));
     caxis(  handles.axes1, [handles.data1min handles.data1max]);
     if popmv1<18
         colormap(handles.axes1, options{popmv1}); %set the colormap for tomography
@@ -229,7 +231,7 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
         myColorMap(1,:) = 1;
         colormap(handles.axes1,myColorMap); %set jetwhite as colormap
     end
-    imagesc(handles.axes2, data_modify(:,:,floor(z2))); %display the selected slice of data_modify
+    imagesc(handles.axes2, data_modify(:,:,uint8(z2))); %display the selected slice of data_modify
     caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if standard matlab colormap 
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -238,8 +240,8 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
         myColorMap(1,:) = 1;
         colormap(handles.axes2,myColorMap); %set jetwhite
     end
-    set(handles.edit2, 'String', num2str(floor(z2))); %set the left scroll text box to the slice
-    set(handles.edit3, 'String', num2str(floor(z2))); %set the right scroll text box to the slice
+    set(handles.edit2, 'String', num2str(uint8(z2))); %set the left scroll text box to the slice
+    set(handles.edit3, 'String', num2str(uint8(z2))); %set the right scroll text box to the slice
     set(handles.slider1, 'Value', z2); %set the scroll bar value - btw hope you're having a good day!
 end
 
@@ -252,6 +254,7 @@ elseif get(handles.checkbox1, 'Value') == 1 %if  linking xy axes
     set(handles.axes2, 'YLim', ylim); %adjust y-axes on right on new slice
     linkaxes([handles.axes1,handles.axes2],'xy') %link the axes
 end
+
 
 % --- Executes during object creation, after setting all properties.
 function slider2_CreateFcn(hObject, eventdata, handles)
@@ -290,7 +293,7 @@ popmv2=get(handles.popupmenu2,'Value'); %get colormap selection
 options={'parula', 'jet', 'hsv', 'hot', 'cool', 'spring', 'summer', 'autumn', 'winter', 'gray', 'bone', ... 
     'copper', 'pink', 'lines', 'colorcube', 'prism', 'flag', 'jetwhite'}; %colormap options
 
-imagesc(handles.axes2, data_modify(:,:,floor(z1))); %plot data_modify at matching slice on right image
+imagesc(handles.axes2, data_modify(:,:,uint8(z1))); %plot data_modify at matching slice on right image
 caxis(  handles.axes2, [handles.data2min handles.data2max]);
 if popmv2<18 %if standard matlab colormap
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -301,7 +304,7 @@ if popmv2<18 %if standard matlab colormap
 end
     
 set(handles.slider2, 'Value', z1); % set the right slider to match the left slider
-set(handles.edit3, 'String', num2str(floor(z1))); %set the right text box of slice # to match
+set(handles.edit3, 'String', num2str(uint8(z1))); %set the right text box of slice # to match
 
 % --- Executes on selection change in popupmenu for colormap on left image.
 function popupmenu1_Callback(hObject, eventdata, handles)
@@ -355,77 +358,185 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-% --- Executes on button press in togglebutton1.
-function togglebutton1_Callback(hObject, eventdata, handles)
+% --- Executes on button press in pushmodify.
+function pushmodify_Callback(hObject, eventdata, handles)
 
 global data_modify %bring in and update data_modify
+
+set(hObject,'Interruptible', 'on');
 
 popmv2=get(handles.popupmenu2,'Value'); %pop menu colormap value selection on right image
 options={'parula', 'jet', 'hsv', 'hot', 'cool', 'spring', 'summer', 'autumn', 'winter', 'gray', 'bone', ...
     'copper', 'pink', 'lines', 'colorcube', 'prism', 'flag', 'jetwhite'}; %colormap options
-z2=floor(get(handles.slider2,'Value')); %get slice number of data_modify
+z1=uint8(get(handles.slider1,'Value')); %get slice number of data1
+z2=uint8(get(handles.slider2,'Value')); %get slice number of data_modify
 xlim = get(handles.axes1, 'XLim'); %get x-axes of left image
 ylim = get(handles.axes1, 'YLim'); %get y-axes of left image
 
-handles.undoslicenumber=z2; %the slice number for undoing
-handles.undoslice=data_modify(:,:,z2); %the slice for undoing
-
-set(hObject,'string','Modify ON','ForegroundColor','green'); %Make Modify OFf -> Modify ON in green
+%The user will not be able to do anything else, so all controls
+%need to be disbabled:
+allhandleArray = [handles.popupmenu3, handles.popupmenu4, handles.edit1,handles.pushmodify];
+% Set them all disabled.
+set(allhandleArray, 'Enable', 'off');
+set(handles.uipanel1,'ForegroundColor', [0, 0.5, 0], 'ShadowColor',[0, 0.5, 0] ); %change panel colors to green
 
 axes_number=get(handles.popupmenu3,'Value'); %pop menu value for drawing on the left ir right image
 
-if axes_number==2
-    hFH = imfreehand(handles.axes1); %tasks user to free hand on axes1
-elseif axes_number==1
-    hFH = imfreehand(handles.axes2); %tasks user to free hand on axes2
+popmv4=get(handles.popupmenu4,'Value'); %pop menu for continuous or single
+
+value_to_impose=str2double(get(handles.edit1,'String')); %the segmentation value to impose on the image
+
+if value_to_impose > handles.data2max
+    handles.data2max=value_to_impose; %update max data_modify in case user has changed max value
+    guidata(hObject,handles); %Update handles
+elseif value_to_impose < handles.data2min
+    handles.data2min=value_to_impose; %update min data_modify in case user has changed min value
+    guidata(hObject,handles); %Update handles
 end
+        
+if popmv4 == 1 %user is in single mode
+    
+    handles.undoslicenumber=z2; %the slice number for undoing
+    handles.undoslice=data_modify(:,:,z2); %the slice for undoing
+    
+    if axes_number==2
+        %bring text box with instructions
+        set(handles.text17, 'Visible', 'on','String', ['Draw on the left image to impose a multi-class segmentation value of ', get(handles.edit1,'String'), ' on the right image. To cancel, press Esc.']);
+        hFH = imfreehand(handles.axes1); %tasks user to free hand on axes1
+    elseif axes_number==1
+        %bring text box with instructions
+        set(handles.text17, 'Visible', 'on','String', ['Draw on the right image to impose a multi-class segmentation value of ', get(handles.edit1,'String'), ' on the right image. To cancel, press Esc.']);
+        hFH = imfreehand(handles.axes2); %tasks user to free hand on axes2
+    end
 
-% At this point the user will draw on the image and the program will wait
+    % At this point the user will draw on the image and the program will wait
+    xlim = get(handles.axes1, 'XLim'); %get x-axes of left image, in case user zoomed or panned
+    ylim = get(handles.axes1, 'YLim'); %get y-axes of left image, in case user zoomed or panned
+    % Once drawing is done (click is released), or the user has pressed ESC
+    if isempty(hFH)
+        % User pushed escape button and didn't make a modification
+%         set(hObject,'string','MODIFY','ForegroundColor','red'); %set text from Modify ON -> MODIFY in red
+        set(allhandleArray, 'Enable', 'on'); %bring back modify-related tools
+        set(handles.text17, 'Visible', 'off'); %remove the text instructions
+        set(handles.uipanel1,'ForegroundColor', [0.6350 0.0780 0.1840], 'ShadowColor',[0.6350 0.0780 0.1840] ); %change panel colors back to red
+        
+    else
+        mask = hFH.createMask(); %create a mask from the drawing
+        
+        % Get value to impose on mask from user input:
+        image=data_modify(:,:,z2); %save the image for imposing mask
+        image(mask)=(value_to_impose); %Update segmentation value on image
+        
+        data_modify(:,:,z2)=image; %update slice with the modifief image
+        
+        imagesc(handles.axes2, data_modify(:,:,uint8(z2))); %display the updated image on data_modify
+        caxis(  handles.axes2, [handles.data2min handles.data2max]);
+        
+        if popmv2<18 %if the colormap
+            colormap(handles.axes2, options{popmv2}); %set the colormap for tomography
+        elseif popmv2==18
+            myColorMap = jet(256); %colormap used for indexing, where 0 is white
+            myColorMap(1,:) = 1;
+            colormap(handles.axes2,myColorMap); %set the colormap to jetwhite
+        end
+        
+        if get(handles.checkbox1, 'Value') == 0 %if NOT linking xy axes
+            linkaxes([handles.axes1,handles.axes2],'off')
+        elseif get(handles.checkbox1, 'Value') == 1 %if  linking xy axes
+            set(handles.axes1, 'XLim', xlim); %set x-axes left image
+            set(handles.axes1, 'YLim', ylim); %set y-axes left image
+            set(handles.axes2, 'XLim', xlim); %set x-axes right image
+            set(handles.axes2, 'YLim', ylim); %set y-axes right image
+            linkaxes([handles.axes1,handles.axes2],'xy') %link the axes
+        end
+        
+        guidata(hObject,handles); %Update handles
+        % Set them all enabled.
+        set(allhandleArray, 'Enable', 'on'); %bring back modify-related tools
+        set(handles.pushbutton3, 'Enable', 'on'); %enable undo button
+        set(handles.text17, 'Visible', 'off'); %remove the text instructions
+        set(handles.uipanel1,'ForegroundColor', [0.6350 0.0780 0.1840], 'ShadowColor',[0.6350 0.0780 0.1840] ); %change panel colors back to red
+  
+    end
+elseif popmv4 == 2 %user is in continuous mode
+    %Bring in data1:
+    data1=handles.data1;
+    
+    handles.undoslicenumber=z2; %the slice number for undoing (if the user exits right away)
+    handles.undoslice=data_modify(:,:,z2); %current slice for undoing (if the user exits right away)
+    
+    if axes_number==2
+        %bring text box with instructions
+        set(handles.text17, 'Visible', 'on','String', ['Continuous mode: draw on the left image to impose a multi-class segmentation value of ', get(handles.edit1,'String'), ' on the right image. When finished, press Esc.']);
+    elseif axes_number==1
+        %bring text box with instructions
+        set(handles.text17, 'Visible', 'on','String', ['Continuous mode: draw on the right image to impose a multi-class segmentation value of ', get(handles.edit1,'String'), ' on the right image. When finished, press Esc.']);
+    end
 
-% Once drawing is done (click is released)
-mask = hFH.createMask(); %create a mask from the drawing
-
-% Get value to impose on mask from user input:
-image=data_modify(:,:,z2); %save the image for imposing mask
-string_value_to_impose=get(handles.edit1,'String'); %the segmentation value to impose on the image
-image(mask)=str2double(string_value_to_impose); %Update segmentation value on image
-
-% % DO NOT CHANGE: Get value to impose on mask from left image:
-% data1=handles.data1;%get data1
-% image_left=data1(:,:,z2); %store left image data1
-% image=data_modify(:,:,z2); %store the image for imposing mask (right)
-% string_value_to_impose=image_left(find(mask==1)); %get intensity from left image at draw region
-% image(find(mask==1))=string_value_to_impose; %Update segmentation value on right image
-
-data_modify(:,:,z2)=image; %update slice with the modifief image
-
-imagesc(handles.axes2, data_modify(:,:,floor(z2))); %display the updated image on data_modify
-caxis(  handles.axes2, [handles.data2min handles.data2max]);
-
-if popmv2<18 %if the colormap
-    colormap(handles.axes2, options{popmv2}); %set the colormap for tomography
-elseif popmv2==18
-    myColorMap = jet(256); %colormap used for indexing, where 0 is white
-    myColorMap(1,:) = 1;
-    colormap(handles.axes2,myColorMap); %set the colormap to jetwhite
+    while popmv4 == 2 %start continuous mode 
+        % Update x and y position in case user has zoomed or panned: 
+        
+        if axes_number==2
+            hFH = imfreehand(handles.axes1); %tasks user to free hand on axes1
+        elseif axes_number==1
+            hFH = imfreehand(handles.axes2); %tasks user to free hand on axes2
+        end
+        xlim = get(handles.axes1, 'XLim'); %get x-axes of left image
+        ylim = get(handles.axes1, 'YLim'); %get y-axes of left image 
+                   
+        % At this point the user will draw on the image and the program will wait
+        guidata(hObject,handles); %Update handles in case modify mode is exited prematurely
+        % Once drawing is done (click is released), or the user has pressed ESC
+        if isempty(hFH)
+            % User pushed escape button and they are done         
+            % Set them all disabled.
+            set(allhandleArray, 'Enable', 'on'); %bring back modify related buttons
+            set(handles.pushbutton3, 'Enable', 'on'); %bring back undo button
+            set(handles.text17, 'Visible', 'off'); %remove the text instructions
+            set(handles.uipanel1,'ForegroundColor', [0.6350 0.0780 0.1840], 'ShadowColor',[0.6350 0.0780 0.1840] ); %change panel colors back to red
+%             handles.data2min=min(data_modify(:)); %update min data_modify in case user has changed min value
+%             handles.data2max=max(data_modify(:)); %update max data_modify in case user has changed max value
+%             guidata(hObject,handles); %Update handles to include updated min and max
+            break %exit the while loop
+        else
+            
+            mask = hFH.createMask(); %create a mask from the drawing
+            handles.undoslicenumber=z2; %update slice number for undoing
+            handles.undoslice=data_modify(:,:,z2); %update the current slice for undoing
+            % Get value to impose on mask from user input:
+            image=data_modify(:,:,z2); %save the image for imposing mask
+            image(mask)=(value_to_impose); %Update segmentation value on image
+            
+            data_modify(:,:,z2)=image; %update slice with the modifief image
+            
+            imagesc(handles.axes2, data_modify(:,:,uint8(z2))); %display the updated image on data_modify
+            caxis(  handles.axes2, [handles.data2min handles.data2max]);
+            
+            if axes_number==2
+                imagesc(handles.axes1, data1(:,:,uint8(z1))); %display the updated image on data_modify
+                caxis(  handles.axes1, [handles.data1min handles.data1max]);
+            end
+            
+            if popmv2<18 %if the colormap
+                colormap(handles.axes2, options{popmv2}); %set the colormap for tomography
+            elseif popmv2==18
+                myColorMap = jet(256); %colormap used for indexing, where 0 is white
+                myColorMap(1,:) = 1;
+                colormap(handles.axes2,myColorMap); %set the colormap to jetwhite
+            end
+            
+            if get(handles.checkbox1, 'Value') == 0 %if NOT linking xy axes
+                linkaxes([handles.axes1,handles.axes2],'off')
+            elseif get(handles.checkbox1, 'Value') == 1 %if  linking xy axes
+                set(handles.axes1, 'XLim', xlim); %set x-axes left image
+                set(handles.axes1, 'YLim', ylim); %set y-axes left image
+                set(handles.axes2, 'XLim', xlim); %set x-axes right image
+                set(handles.axes2, 'YLim', ylim); %set y-axes right image
+                linkaxes([handles.axes1,handles.axes2],'xy') %link the axes
+            end
+        end
+    end
 end
-
-if get(handles.checkbox1, 'Value') == 0 %if NOT linking xy axes
-    linkaxes([handles.axes1,handles.axes2],'off')
-elseif get(handles.checkbox1, 'Value') == 1 %if  linking xy axes
-    set(handles.axes1, 'XLim', xlim); %set x-axes left image
-    set(handles.axes1, 'YLim', ylim); %set y-axes left image
-    set(handles.axes2, 'XLim', xlim); %set x-axes right image
-    set(handles.axes2, 'YLim', ylim); %set y-axes right image
-    linkaxes([handles.axes1,handles.axes2],'xy') %link the axes
-end
-
-guidata(hObject,handles); %Update handles
-set(hObject,'string','Modify OFF','ForegroundColor','red'); %set text from Modify ON -> Modify OFF in red
-set(handles.pushbutton3,'Enable','on'); %undo button enabled
-% set(handles.pushbutton3, 'ForegroundColor', 'black'); %Make the button usable
-
-% end
 
 % --- Executes on selection change in popupmenu3.
 function popupmenu3_Callback(hObject, eventdata, handles)
@@ -509,6 +620,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+
 % --- Executes on button press in pushbutton1 left 'GO'
 function pushbutton1_Callback(hObject, eventdata, handles)
  
@@ -520,7 +632,7 @@ options={'parula', 'jet', 'hsv', 'hot', 'cool', 'spring', 'summer', 'autumn', 'w
     'copper', 'pink', 'lines', 'colorcube', 'prism', 'flag', 'jetwhite'}; %colormap options
 
 z1=str2double(get(handles.edit2,'String')); %get z value from left text box
-set(handles.slider1, 'Value', floor(z1)); %set the slider value to match user text choice
+set(handles.slider1, 'Value', uint8(z1)); %set the slider value to match user text choice
 
 xlim = get(handles.axes1, 'XLim'); %get the x-axes of left image
 ylim = get(handles.axes1, 'YLim'); %get the y-axes of left image
@@ -529,7 +641,7 @@ ylim = get(handles.axes1, 'YLim'); %get the y-axes of left image
 data1=handles.data1; %bring in data1
 
 %plot image1
-imagesc(handles.axes1, data1(:,:,floor(z1)));
+imagesc(handles.axes1, data1(:,:,uint8(z1)));
 caxis(  handles.axes1, [handles.data1min handles.data1max]);
 
 if popmv1<18 %if default colormap
@@ -545,8 +657,8 @@ if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
     %don't change the righ image
 elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes, need to change the right image too
     set(handles.slider2, 'Value', z1); %set the right slider value to match
-    set(handles.edit3, 'String', num2str(floor(z1))); %set the right text box to match
-    imagesc(handles.axes2, data_modify(:,:,floor(z1))); %show the right image at the matching slice
+    set(handles.edit3, 'String', num2str(uint8(z1))); %set the right text box to match
+    imagesc(handles.axes2, data_modify(:,:,uint8(z1))); %show the right image at the matching slice
     caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if default colormaps
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -581,10 +693,10 @@ xlim = get(handles.axes1, 'XLim'); %get left xlim
 ylim = get(handles.axes1, 'YLim'); %get right xlim
 
 z2=str2double(get(handles.edit3,'String')); %get left user inputted text slice
-set(handles.slider2, 'Value', floor(z2)); %set slide to the desired slice   
+set(handles.slider2, 'Value', uint8(z2)); %set slide to the desired slice   
 
 if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
-    imagesc(handles.axes2, data_modify(:,:,floor(z2))); %update right image to the new slice
+    imagesc(handles.axes2, data_modify(:,:,uint8(z2))); %update right image to the new slice
     caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if default colormap option
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -596,7 +708,7 @@ if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
 
 elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
     data1=handles.data1; %bring in data1 left data
-    imagesc(handles.axes1, data1(:,:,floor(z2))); %show left data at matching slice
+    imagesc(handles.axes1, data1(:,:,uint8(z2))); %show left data at matching slice
     caxis(  handles.axes1, [handles.data1min handles.data1max]);
     if popmv1<18 %if default colormaps
         colormap(handles.axes1, options{popmv1}); %set the colormap
@@ -605,7 +717,7 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
         myColorMap(1,:) = 1;
         colormap(handles.axes1,myColorMap); %set colormap to jetwhite
     end
-    imagesc(handles.axes2, data_modify(:,:,floor(z2))); %show right image at matching slice
+    imagesc(handles.axes2, data_modify(:,:,uint8(z2))); %show right image at matching slice
     caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if default colormap
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -614,9 +726,9 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
         myColorMap(1,:) = 1;
         colormap(handles.axes2,myColorMap); %set jet-white
     end
-    set(handles.edit2, 'String', num2str(floor(z2))); %set the left text box slice number
-    set(handles.edit3, 'String', num2str(floor(z2))); %set the righ text box slice number
-    set(handles.slider1, 'Value', floor(z2)); %set left slider value
+    set(handles.edit2, 'String', num2str(uint8(z2))); %set the left text box slice number
+    set(handles.edit3, 'String', num2str(uint8(z2))); %set the righ text box slice number
+    set(handles.slider1, 'Value', uint8(z2)); %set left slider value
 end
 
 if get(handles.checkbox1, 'Value') == 0 %if NOT linking xy axes
@@ -635,6 +747,7 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+% Undo button
 global data_modify
 z2=handles.undoslicenumber;
 data_modify(:,:,z2)=handles.undoslice;
@@ -648,10 +761,10 @@ options={'parula', 'jet', 'hsv', 'hot', 'cool', 'spring', 'summer', 'autumn', 'w
 xlim = get(handles.axes1, 'XLim'); %get left xlim
 ylim = get(handles.axes1, 'YLim'); %get right xlim
 
-set(handles.slider2, 'Value', floor(z2)); %set slide to the desired slice   
+set(handles.slider2, 'Value', uint8(z2)); %set slide to the desired slice   
 
 if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
-    imagesc(handles.axes2, data_modify(:,:,floor(z2))); %update right image to the new slice
+    imagesc(handles.axes2, data_modify(:,:,uint8(z2))); %update right image to the new slice
     caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if default colormap option
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -663,7 +776,7 @@ if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
 
 elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
     data1=handles.data1; %bring in data1 left data
-    imagesc(handles.axes1, data1(:,:,floor(z2))); %show left data at matching slice
+    imagesc(handles.axes1, data1(:,:,uint8(z2))); %show left data at matching slice
     caxis(  handles.axes1, [handles.data1min handles.data1max]);
     if popmv1<18 %if default colormaps
         colormap(handles.axes1, options{popmv1}); %set the colormap
@@ -672,7 +785,7 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
         myColorMap(1,:) = 1;
         colormap(handles.axes1,myColorMap); %set colormap to jetwhite
     end
-    imagesc(handles.axes2, data_modify(:,:,floor(z2))); %show right image at matching slice
+    imagesc(handles.axes2, data_modify(:,:,uint8(z2))); %show right image at matching slice
     caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if default colormap
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -681,9 +794,9 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
         myColorMap(1,:) = 1;
         colormap(handles.axes2,myColorMap); %set jet-white
     end
-    set(handles.edit2, 'String', num2str(floor(z2))); %set the left text box slice number
-    set(handles.edit3, 'String', num2str(floor(z2))); %set the righ text box slice number
-    set(handles.slider1, 'Value', floor(z2)); %set left slider value
+    set(handles.edit2, 'String', num2str(uint8(z2))); %set the left text box slice number
+    set(handles.edit3, 'String', num2str(uint8(z2))); %set the righ text box slice number
+    set(handles.slider1, 'Value', uint8(z2)); %set left slider value
 end
 
 if get(handles.checkbox1, 'Value') == 0 %if NOT linking xy axes
@@ -694,5 +807,112 @@ elseif get(handles.checkbox1, 'Value') == 1 %if linking xy axes
     set(handles.axes2, 'XLim', xlim); %set x-axes of left image
     set(handles.axes2, 'YLim', ylim); %set y-axes of right image
     linkaxes([handles.axes1,handles.axes2],'xy') %ensure linking is on
+end
+
+
+
+% --- Executes on selection change in popupmenu4.
+function popupmenu4_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu4 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu4
+popmv=get(hObject,'Value'); %pop menu value of single or continuous
+if popmv==1 %single acquisition
+    % do nothing, this is the default
+elseif popmv==2 %use is entering continuous mode
+    CreateStruct.Interpreter = 'tex';
+    CreateStruct.WindowStyle = 'modal';
+    msgbox({'\fontsize{18}Entering Continuous Modification Mode';...
+        '\fontsize{14}When you press the MODIFY button, you will be able to make multiplie modifications. Zooming and panning will not disrupt continuous mode, but pressing other buttons will exit continuous mode. \bfWhen you are done modifying the layer, press the ESC key to exit continuous mode.'},...
+        'Continuous Modification', 'help',CreateStruct); %Will warn and instruct the user
+end
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu4_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes when uipanel1 is resized.
+function uipanel1_SizeChangedFcn(hObject, eventdata, handles)
+% hObject    handle to uipanel1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on key press with focus on figure1 or any of its controls.
+function figure1_WindowKeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.FIGURE)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+switch eventdata.Key
+    case 'slash'
+        pushmodify_Callback(handles.pushmodify,[], handles);
+    case 'return'
+        if get(handles.checkbox2, 'Value') == 1 %if linking z axes
+            pushbutton1_Callback(handles.pushbutton1, [], handles);
+        end
+    case 'pageup'
+        if get(handles.checkbox2, 'Value') == 1 %if linking z axes
+            z=str2double(get(handles.edit2,'String')); %get left user inputted text slice
+            if z+1 <= get(handles.slider1, 'max') %get the max value
+                set(handles.edit2, 'String', num2str(z+1))
+                pushbutton1_Callback(handles.pushbutton1, [], handles);
+            end
+        end
+    case 'pagedown'
+        if get(handles.checkbox2, 'Value') == 1 %if linking z axes
+            z=str2double(get(handles.edit2,'String')); %get left user inputted text slice
+            if z-1 >= get(handles.slider1, 'min') %get the min left slider to 1
+                set(handles.edit2, 'String', num2str(z-1))
+                pushbutton1_Callback(handles.pushbutton1, [], handles);
+            end
+        end
+    case 'equal'
+        zoom(1.2);
+    case 'hyphen'
+        zoom(0.83)
+    case 'uparrow'
+        if get(handles.checkbox1, 'Value') == 1 %if linking xy axes
+            ylim = get(handles.axes1, 'YLim'); %get right xlim
+            set(handles.axes1, 'YLim', ylim-1); %set y-axes of right image
+            set(handles.axes2, 'YLim', ylim-1); %set y-axes of right image
+            pushbutton1_Callback(handles.pushbutton1, [], handles);
+        end
+    case 'downarrow'
+        if get(handles.checkbox1, 'Value') == 1 %if linking xy axes
+            ylim = get(handles.axes1, 'YLim'); %get right xlim
+            set(handles.axes1, 'YLim', ylim+1); %set y-axes of right image
+            set(handles.axes2, 'YLim', ylim+1); %set y-axes of right image
+            pushbutton1_Callback(handles.pushbutton1, [], handles);
+        end
+    case 'leftarrow'
+        if get(handles.checkbox1, 'Value') == 1 %if linking xy axes
+            xlim = get(handles.axes1, 'XLim'); %get left xlim
+            set(handles.axes1, 'XLim', xlim-1); %set x-axes of left image
+            set(handles.axes2, 'XLim', xlim-1); %set x-axes of left image
+            pushbutton1_Callback(handles.pushbutton1, [], handles);
+        end
+    case 'rightarrow'
+        if get(handles.checkbox1, 'Value') == 1 %if linking xy axes
+            xlim = get(handles.axes1, 'XLim'); %get left xlim
+            set(handles.axes1, 'XLim', xlim+1); %set x-axes of left image
+            set(handles.axes2, 'XLim', xlim+1); %set x-axes of left image
+            pushbutton1_Callback(handles.pushbutton1, [], handles);
+        end
 end
 

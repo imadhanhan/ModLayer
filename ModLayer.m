@@ -144,9 +144,9 @@ ylim = get(handles.axes1, 'YLim'); %get the Y axes location (in case the user ha
 data1=handles.data1;
 
 %plot image1 for data1
-imagesc(handles.axes1, data1(:,:,uint8(z1))); %plot the desired slice
+imagesc(handles.axes1, data1(:,:,uint32(z1))); %plot the desired slice
 caxis(  handles.axes1, [handles.data1min handles.data1max]);
-set(handles.edit2, 'String', num2str(uint8(z1))); %set the slider text box to the slice
+set(handles.edit2, 'String', num2str(uint32(z1))); %set the slider text box to the slice
 if popmv1<18 %if using a default colormap
     colormap(handles.axes1, options{popmv1}); %set the colormap
 elseif popmv1==18 %is uing the custom colormap
@@ -160,8 +160,8 @@ if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
     %do nothing, user is only changing the left image
 elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
     set(handles.slider2, 'Value', z1); %srt the right slider to match left slider
-    set(handles.edit3, 'String', num2str(uint8(z1))); %srt left slider text to match layer
-    imagesc(handles.axes2, data_modify(:,:,uint8(z1))); %display the image
+    set(handles.edit3, 'String', num2str(uint32(z1))); %srt left slider text to match layer
+    imagesc(handles.axes2, data_modify(:,:,uint32(z1))); %display the image
     caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if user selected a default colormap
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -209,7 +209,7 @@ ylim = get(handles.axes1, 'YLim'); %get the ylim from data1
 
 if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
     z2=get(handles.slider2,'Value'); %get the right slider value
-    imagesc(handles.axes2, data_modify(:,:,uint8(z2))); %set the data_modify image to the new layer
+    imagesc(handles.axes2, data_modify(:,:,uint32(z2))); %set the data_modify image to the new layer
     caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if default colormap choice
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -218,11 +218,11 @@ if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
         myColorMap(1,:) = 1;
         colormap(handles.axes2,myColorMap); %set jetwhite
     end
-    set(handles.edit3, 'String', num2str(uint8(z2)));
+    set(handles.edit3, 'String', num2str(uint32(z2)));
 elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
     data1=handles.data1;%get data1
     z2=get(handles.slider2,'Value'); %get the z location of the right slider
-    imagesc(handles.axes1, data1(:,:,uint8(z2)));
+    imagesc(handles.axes1, data1(:,:,uint32(z2)));
     caxis(  handles.axes1, [handles.data1min handles.data1max]);
     if popmv1<18
         colormap(handles.axes1, options{popmv1}); %set the colormap for tomography
@@ -231,7 +231,7 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
         myColorMap(1,:) = 1;
         colormap(handles.axes1,myColorMap); %set jetwhite as colormap
     end
-    imagesc(handles.axes2, data_modify(:,:,uint8(z2))); %display the selected slice of data_modify
+    imagesc(handles.axes2, data_modify(:,:,uint32(z2))); %display the selected slice of data_modify
     caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if standard matlab colormap 
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -240,8 +240,8 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
         myColorMap(1,:) = 1;
         colormap(handles.axes2,myColorMap); %set jetwhite
     end
-    set(handles.edit2, 'String', num2str(uint8(z2))); %set the left scroll text box to the slice
-    set(handles.edit3, 'String', num2str(uint8(z2))); %set the right scroll text box to the slice
+    set(handles.edit2, 'String', num2str(uint32(z2))); %set the left scroll text box to the slice
+    set(handles.edit3, 'String', num2str(uint32(z2))); %set the right scroll text box to the slice
     set(handles.slider1, 'Value', z2); %set the scroll bar value - btw hope you're having a good day!
 end
 
@@ -293,7 +293,7 @@ popmv2=get(handles.popupmenu2,'Value'); %get colormap selection
 options={'parula', 'jet', 'hsv', 'hot', 'cool', 'spring', 'summer', 'autumn', 'winter', 'gray', 'bone', ... 
     'copper', 'pink', 'lines', 'colorcube', 'prism', 'flag', 'jetwhite'}; %colormap options
 
-imagesc(handles.axes2, data_modify(:,:,uint8(z1))); %plot data_modify at matching slice on right image
+imagesc(handles.axes2, data_modify(:,:,uint32(z1))); %plot data_modify at matching slice on right image
 caxis(  handles.axes2, [handles.data2min handles.data2max]);
 if popmv2<18 %if standard matlab colormap
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -304,7 +304,7 @@ if popmv2<18 %if standard matlab colormap
 end
     
 set(handles.slider2, 'Value', z1); % set the right slider to match the left slider
-set(handles.edit3, 'String', num2str(uint8(z1))); %set the right text box of slice # to match
+set(handles.edit3, 'String', num2str(uint32(z1))); %set the right text box of slice # to match
 
 % --- Executes on selection change in popupmenu for colormap on left image.
 function popupmenu1_Callback(hObject, eventdata, handles)
@@ -368,8 +368,8 @@ set(hObject,'Interruptible', 'on');
 popmv2=get(handles.popupmenu2,'Value'); %pop menu colormap value selection on right image
 options={'parula', 'jet', 'hsv', 'hot', 'cool', 'spring', 'summer', 'autumn', 'winter', 'gray', 'bone', ...
     'copper', 'pink', 'lines', 'colorcube', 'prism', 'flag', 'jetwhite'}; %colormap options
-z1=uint8(get(handles.slider1,'Value')); %get slice number of data1
-z2=uint8(get(handles.slider2,'Value')); %get slice number of data_modify
+z1=uint32(get(handles.slider1,'Value')); %get slice number of data1
+z2=uint32(get(handles.slider2,'Value')); %get slice number of data_modify
 xlim = get(handles.axes1, 'XLim'); %get x-axes of left image
 ylim = get(handles.axes1, 'YLim'); %get y-axes of left image
 
@@ -429,7 +429,7 @@ if popmv4 == 1 %user is in single mode
         
         data_modify(:,:,z2)=image; %update slice with the modifief image
         
-        imagesc(handles.axes2, data_modify(:,:,uint8(z2))); %display the updated image on data_modify
+        imagesc(handles.axes2, data_modify(:,:,uint32(z2))); %display the updated image on data_modify
         caxis(  handles.axes2, [handles.data2min handles.data2max]);
         
         if popmv2<18 %if the colormap
@@ -509,11 +509,11 @@ elseif popmv4 == 2 %user is in continuous mode
             
             data_modify(:,:,z2)=image; %update slice with the modifief image
             
-            imagesc(handles.axes2, data_modify(:,:,uint8(z2))); %display the updated image on data_modify
+            imagesc(handles.axes2, data_modify(:,:,uint32(z2))); %display the updated image on data_modify
             caxis(  handles.axes2, [handles.data2min handles.data2max]);
             
             if axes_number==2
-                imagesc(handles.axes1, data1(:,:,uint8(z1))); %display the updated image on data_modify
+                imagesc(handles.axes1, data1(:,:,uint32(z1))); %display the updated image on data_modify
                 caxis(  handles.axes1, [handles.data1min handles.data1max]);
             end
             
@@ -632,7 +632,7 @@ options={'parula', 'jet', 'hsv', 'hot', 'cool', 'spring', 'summer', 'autumn', 'w
     'copper', 'pink', 'lines', 'colorcube', 'prism', 'flag', 'jetwhite'}; %colormap options
 
 z1=str2double(get(handles.edit2,'String')); %get z value from left text box
-set(handles.slider1, 'Value', uint8(z1)); %set the slider value to match user text choice
+set(handles.slider1, 'Value', uint32(z1)); %set the slider value to match user text choice
 
 xlim = get(handles.axes1, 'XLim'); %get the x-axes of left image
 ylim = get(handles.axes1, 'YLim'); %get the y-axes of left image
@@ -641,7 +641,7 @@ ylim = get(handles.axes1, 'YLim'); %get the y-axes of left image
 data1=handles.data1; %bring in data1
 
 %plot image1
-imagesc(handles.axes1, data1(:,:,uint8(z1)));
+imagesc(handles.axes1, data1(:,:,uint32(z1)));
 caxis(  handles.axes1, [handles.data1min handles.data1max]);
 
 if popmv1<18 %if default colormap
@@ -657,8 +657,8 @@ if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
     %don't change the righ image
 elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes, need to change the right image too
     set(handles.slider2, 'Value', z1); %set the right slider value to match
-    set(handles.edit3, 'String', num2str(uint8(z1))); %set the right text box to match
-    imagesc(handles.axes2, data_modify(:,:,uint8(z1))); %show the right image at the matching slice
+    set(handles.edit3, 'String', num2str(uint32(z1))); %set the right text box to match
+    imagesc(handles.axes2, data_modify(:,:,uint32(z1))); %show the right image at the matching slice
     caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if default colormaps
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -693,10 +693,10 @@ xlim = get(handles.axes1, 'XLim'); %get left xlim
 ylim = get(handles.axes1, 'YLim'); %get right xlim
 
 z2=str2double(get(handles.edit3,'String')); %get left user inputted text slice
-set(handles.slider2, 'Value', uint8(z2)); %set slide to the desired slice   
+set(handles.slider2, 'Value', uint32(z2)); %set slide to the desired slice   
 
 if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
-    imagesc(handles.axes2, data_modify(:,:,uint8(z2))); %update right image to the new slice
+    imagesc(handles.axes2, data_modify(:,:,uint32(z2))); %update right image to the new slice
     caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if default colormap option
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -708,7 +708,7 @@ if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
 
 elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
     data1=handles.data1; %bring in data1 left data
-    imagesc(handles.axes1, data1(:,:,uint8(z2))); %show left data at matching slice
+    imagesc(handles.axes1, data1(:,:,uint32(z2))); %show left data at matching slice
     caxis(  handles.axes1, [handles.data1min handles.data1max]);
     if popmv1<18 %if default colormaps
         colormap(handles.axes1, options{popmv1}); %set the colormap
@@ -717,7 +717,7 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
         myColorMap(1,:) = 1;
         colormap(handles.axes1,myColorMap); %set colormap to jetwhite
     end
-    imagesc(handles.axes2, data_modify(:,:,uint8(z2))); %show right image at matching slice
+    imagesc(handles.axes2, data_modify(:,:,uint32(z2))); %show right image at matching slice
     caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if default colormap
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -726,9 +726,9 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
         myColorMap(1,:) = 1;
         colormap(handles.axes2,myColorMap); %set jet-white
     end
-    set(handles.edit2, 'String', num2str(uint8(z2))); %set the left text box slice number
-    set(handles.edit3, 'String', num2str(uint8(z2))); %set the righ text box slice number
-    set(handles.slider1, 'Value', uint8(z2)); %set left slider value
+    set(handles.edit2, 'String', num2str(uint32(z2))); %set the left text box slice number
+    set(handles.edit3, 'String', num2str(uint32(z2))); %set the righ text box slice number
+    set(handles.slider1, 'Value', uint32(z2)); %set left slider value
 end
 
 if get(handles.checkbox1, 'Value') == 0 %if NOT linking xy axes
@@ -761,10 +761,10 @@ options={'parula', 'jet', 'hsv', 'hot', 'cool', 'spring', 'summer', 'autumn', 'w
 xlim = get(handles.axes1, 'XLim'); %get left xlim
 ylim = get(handles.axes1, 'YLim'); %get right xlim
 
-set(handles.slider2, 'Value', uint8(z2)); %set slide to the desired slice   
+set(handles.slider2, 'Value', uint32(z2)); %set slide to the desired slice   
 
 if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
-    imagesc(handles.axes2, data_modify(:,:,uint8(z2))); %update right image to the new slice
+    imagesc(handles.axes2, data_modify(:,:,uint32(z2))); %update right image to the new slice
     caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if default colormap option
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -776,7 +776,7 @@ if get(handles.checkbox2, 'Value') == 0 %if NOT linking z axes
 
 elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
     data1=handles.data1; %bring in data1 left data
-    imagesc(handles.axes1, data1(:,:,uint8(z2))); %show left data at matching slice
+    imagesc(handles.axes1, data1(:,:,uint32(z2))); %show left data at matching slice
     caxis(  handles.axes1, [handles.data1min handles.data1max]);
     if popmv1<18 %if default colormaps
         colormap(handles.axes1, options{popmv1}); %set the colormap
@@ -785,7 +785,7 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
         myColorMap(1,:) = 1;
         colormap(handles.axes1,myColorMap); %set colormap to jetwhite
     end
-    imagesc(handles.axes2, data_modify(:,:,uint8(z2))); %show right image at matching slice
+    imagesc(handles.axes2, data_modify(:,:,uint32(z2))); %show right image at matching slice
     caxis(  handles.axes2, [handles.data2min handles.data2max]);
     if popmv2<18 %if default colormap
         colormap(handles.axes2, options{popmv2}); %set the colormap
@@ -794,9 +794,9 @@ elseif get(handles.checkbox2, 'Value') == 1 %if linking z axes
         myColorMap(1,:) = 1;
         colormap(handles.axes2,myColorMap); %set jet-white
     end
-    set(handles.edit2, 'String', num2str(uint8(z2))); %set the left text box slice number
-    set(handles.edit3, 'String', num2str(uint8(z2))); %set the righ text box slice number
-    set(handles.slider1, 'Value', uint8(z2)); %set left slider value
+    set(handles.edit2, 'String', num2str(uint32(z2))); %set the left text box slice number
+    set(handles.edit3, 'String', num2str(uint32(z2))); %set the righ text box slice number
+    set(handles.slider1, 'Value', uint32(z2)); %set left slider value
 end
 
 if get(handles.checkbox1, 'Value') == 0 %if NOT linking xy axes

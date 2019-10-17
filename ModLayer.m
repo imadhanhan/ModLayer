@@ -76,19 +76,33 @@ caxis(  handles.axes2, [handles.data2min handles.data2max]);
 % Set output objects
 handles.output = hObject;
 
-handles.size1=size(data1); %the size of the data
-handles.size2=size(data_modify); %the size of data_modify, which should match and was warned above
-
 handles.data1=data1; %store data1
 
-%temp store sizes
-s1=handles.size1; 
-s2=handles.size2;
+s1=size(data1); %the size of the data
+s2=size(data_modify); %the size of data_modify, which should match and was warned above
+
+if size(s1)<3 %if it's a 2D image
+    s1(3)=1;
+    slider_step1=0;
+else
+    slider_step1=1/(s1(3)-1);
+end
+
+if size(s2)<3 %if data_modify is a 2D image
+    s2(3)=1;
+    slider_step2=0;
+else
+    slider_step2=1/(s2(3)-1);
+end
+
+%store sizes
+handles.size1=s1; 
+handles.size2=s2;
 
 set(handles.slider1, 'min',1); %set the min left slider to 1
 set(handles.slider1, 'max',s1(3)); %set the max left slider to the max of the number of layers
 set(handles.slider1, 'Value', 1); %set slider value set to 1
-set(handles.slider1, 'SliderStep', [1/(s1(3)-1) , 1/(s1(3)-1) ]); %set the slider step
+set(handles.slider1, 'SliderStep', [slider_step1 , slider_step1 ]); %set the slider step
 set(handles.text2, 'String', num2str(s1(3))) %the text box for the max layer
 set(handles.text3, 'String', num2str(1)) %the text box for the min layer
 
@@ -96,7 +110,7 @@ set(handles.text3, 'String', num2str(1)) %the text box for the min layer
 set(handles.slider2, 'min',1);%set the min left slider to 1
 set(handles.slider2, 'max',s2(3));%set the max left slider to the max of the number of layers
 set(handles.slider2, 'Value', 1);%set slider value set to 1
-set(handles.slider2, 'SliderStep', [1/(s2(3)-1) , 1/(s2(3)-1) ]);%set the slider step
+set(handles.slider2, 'SliderStep', [slider_step2 , slider_step2 ]);%set the slider step
 set(handles.text9, 'String', num2str(s2(3)))%the text box for the max layer
 set(handles.text10, 'String', num2str(1))%the text box for the min layer
 
@@ -860,7 +874,7 @@ function figure1_WindowKeyPressFcn(hObject, eventdata, handles)
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
 switch eventdata.Key
-    case 'slash'
+    case 'backslash'
         pushmodify_Callback(handles.pushmodify,[], handles);
     case 'return'
         if get(handles.checkbox2, 'Value') == 1 %if linking z axes
@@ -873,6 +887,8 @@ switch eventdata.Key
                 set(handles.edit2, 'String', num2str(z+1))
                 pushbutton1_Callback(handles.pushbutton1, [], handles);
             end
+        else
+            errordlg('Data must be linked in the Z for keyboard shortcut','ModLayer Error')
         end
     case 'pagedown'
         if get(handles.checkbox2, 'Value') == 1 %if linking z axes
@@ -881,6 +897,8 @@ switch eventdata.Key
                 set(handles.edit2, 'String', num2str(z-1))
                 pushbutton1_Callback(handles.pushbutton1, [], handles);
             end
+        else
+            errordlg('Data must be linked in the Z for keyboard shortcut','ModLayer Error')
         end
     case 'equal'
         zoom(1.2);
@@ -889,30 +907,42 @@ switch eventdata.Key
     case 'uparrow'
         if get(handles.checkbox1, 'Value') == 1 %if linking xy axes
             ylim = get(handles.axes1, 'YLim'); %get right xlim
-            set(handles.axes1, 'YLim', ylim-1); %set y-axes of right image
-            set(handles.axes2, 'YLim', ylim-1); %set y-axes of right image
+            delta=ceil(abs(0.02*diff(ylim)));
+            set(handles.axes1, 'YLim', ylim-delta); %set y-axes of right image
+            set(handles.axes2, 'YLim', ylim-delta); %set y-axes of right image
             pushbutton1_Callback(handles.pushbutton1, [], handles);
+        else
+            errordlg('Data must be linked in the XY for keyboard shortcut','ModLayer Error')
         end
     case 'downarrow'
         if get(handles.checkbox1, 'Value') == 1 %if linking xy axes
             ylim = get(handles.axes1, 'YLim'); %get right xlim
-            set(handles.axes1, 'YLim', ylim+1); %set y-axes of right image
-            set(handles.axes2, 'YLim', ylim+1); %set y-axes of right image
+            delta=ceil(abs(0.02*diff(ylim)));
+            set(handles.axes1, 'YLim', ylim+delta); %set y-axes of right image
+            set(handles.axes2, 'YLim', ylim+delta); %set y-axes of right image
             pushbutton1_Callback(handles.pushbutton1, [], handles);
+        else
+            errordlg('Data must be linked in the XY for keyboard shortcut','ModLayer Error')
         end
     case 'leftarrow'
         if get(handles.checkbox1, 'Value') == 1 %if linking xy axes
             xlim = get(handles.axes1, 'XLim'); %get left xlim
-            set(handles.axes1, 'XLim', xlim-1); %set x-axes of left image
-            set(handles.axes2, 'XLim', xlim-1); %set x-axes of left image
+            delta=ceil(abs(0.02*diff(xlim)));
+            set(handles.axes1, 'XLim', xlim-delta); %set x-axes of left image
+            set(handles.axes2, 'XLim', xlim-delta); %set x-axes of left image
             pushbutton1_Callback(handles.pushbutton1, [], handles);
+        else
+            errordlg('Data must be linked in the XY for keyboard shortcut','ModLayer Error')
         end
     case 'rightarrow'
         if get(handles.checkbox1, 'Value') == 1 %if linking xy axes
             xlim = get(handles.axes1, 'XLim'); %get left xlim
-            set(handles.axes1, 'XLim', xlim+1); %set x-axes of left image
-            set(handles.axes2, 'XLim', xlim+1); %set x-axes of left image
+            delta=ceil(abs(0.02*diff(xlim)));
+            set(handles.axes1, 'XLim', xlim+delta); %set x-axes of left image
+            set(handles.axes2, 'XLim', xlim+delta); %set x-axes of left image
             pushbutton1_Callback(handles.pushbutton1, [], handles);
+        else
+            errordlg('Data must be linked in the XY for keyboard shortcut','ModLayer Error')
         end
 end
 

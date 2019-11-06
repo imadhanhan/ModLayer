@@ -2,7 +2,7 @@
 
 If you use this tool and your work results in a publication, please cite as:
 
-I. Hanhan, M.D. Sangid, ModLayer: A Matlab GUI Drawing Segmentation Tool for Classifying and Processing 3D Data, Submitt. under Rev. (2019).
+Hanhan, I. & Sangid, M.D. Integr Mater Manuf Innov (2019). https://doi.org/10.1007/s40192-019-00160-5
 
 Instructions for download and installation:
 

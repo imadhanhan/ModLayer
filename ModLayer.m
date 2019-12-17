@@ -1,18 +1,49 @@
-% ModLayer(raw3Dstack)
-% Imad Hanhan and Michael D. Sangid. August, 2019. Purdue University.
-% ModLayer: A MATLAB GUI Drawing Segmentation Tool for Visualizing and Classifying 3D Data
+% ModLayer Visualizes a 3D reference image and an adjustable 3D image,
+% allowing the user to simultaneously scroll, zoom, pan, and modify regions
+% through interactive drawing on the image stacks.
 %
-% ModLayer is a tool that allows for slice-by-slice Visualization of two 3D
-% datasets. A global variable called data_modify must be instantiated in
-% the workspace and must have the same size as raw3Dstack.
-% For example: 
-%               raw3Dstack=imagestackofinterest;
-%               global data_modify;
-%               data_modify=processed3Dstacked;
-%               ModLayer(raw3Dstack)
+%-----------------------------------------------------------------------------
+%
+%   Imad Hanhan and Michael D. Sangid, Purdue University, 2019.
+%
+%-----------------------------------------------------------------------------
+%
+%   ModLayer(reference_3D_image) opens the ModLayer gui with the stacks of
+%   images in reference_3D_image visualized on the left, and the stacks of
+%   the global variable 'data_modify' visualized on the right. Global
+%   variable 'data_modify' must be defined prior to running ModLayer.
+%
+%       For example:
+%           global data_modify
+%           data_modify=adjustable_3D_data;
+%           ModLayer(reference_3D_image)
+%
+%	ModLayer keyboard shortcuts:
+%	Note: When zoom/pan/cursor are active, ModLayer's keyboard shortcuts
+%	are not. You must unclick zoom/pan/cursor to allow ModLayer's keyboard 
+%	shortcuts to work. Otherwise, MATLAb will assubme keyboard shortcuts
+%	for it's built-in zoom/pan/cursor functions.
+%
+%   	Plus Sign         +     zoom in
+%   	Hyphen            -     zoom out
+%   	Page Up         pagup   scroll to next slice
+%   	Page Down      pagdown  scroll to previous slice
+%   	Left Arrow              pan left
+%   	Right Arrow             pan right
+%   	Up Arrow                pan up
+%   	Down Arrow              pan down
+%   	Backslash         \     modify
+%
+%-----------------------------------------------------------------------------
+% 
 % If you use this tool and your work results in a publication, please cite as:
-% I. Hanhan, M.D. Sangid, ModLayer: A Matlab GUI Drawing Segmentation Tool for 
-% Classifying and Processing 3D Data, Submitt. under Rev. (2019).
+%
+% Hanhan, Imad, and Michael D. Sangid. "ModLayer: A MATLAB GUI Drawing
+%      Segmentation Tool for Visualizing and Classifying 3D Data." Integrating
+%      Materials and Manufacturing Innovation (2019): 1-8.
+%
+%-----------------------------------------------------------------------------
+
 
 function varargout = ModLayer(varargin)
 % Begin initialization code - DO NOT EDIT
@@ -82,22 +113,22 @@ s1=size(data1); %the size of the data
 s2=size(data_modify); %the size of data_modify, which should match and was warned above
 
 if size(s1)<3 %if it's a 2D image
-    s1(3)=1;
-    slider_step1=0;
+    s1(3)=1; %set the third dimension to 1
+    slider_step1=0; %set the slider step to 0, will make slider bar not do anything
 else
-    slider_step1=1/(s1(3)-1);
+    slider_step1=1/(s1(3)-1); %otherwise, set the slider bar to a correct stepsize
 end
 
 if size(s2)<3 %if data_modify is a 2D image
-    s2(3)=1;
-    slider_step2=0;
+    s2(3)=1; %set the third dimension to 1
+    slider_step2=0;%set the slider step to 0, will make slider bar not do anything
 else
-    slider_step2=1/(s2(3)-1);
+    slider_step2=1/(s2(3)-1);%otherwise, set the slider bar to a correct stepsize
 end
 
 %store sizes
-handles.size1=s1; 
-handles.size2=s2;
+handles.size1=s1; %store the size of the reference image
+handles.size2=s2; %store the size of data_modify
 
 set(handles.slider1, 'min',1); %set the min left slider to 1
 set(handles.slider1, 'max',s1(3)); %set the max left slider to the max of the number of layers
@@ -121,10 +152,7 @@ set(handles.popupmenu2, 'Value', 18) %set the colormap option to 18, JetWhite
 
 set(handles.pushbutton3,'Enable','off'); %undo button disabled
 
-handles.currentmodify=0; %user is not in the middle of continuous modification
-
-% Update handles structure
-guidata(hObject, handles);
+guidata(hObject, handles);% Update handles structure
 
 % --- Outputs from this function are returned to the command line.
 function varargout = ModLayer_OutputFcn(hObject, eventdata, handles) 
@@ -908,18 +936,33 @@ switch eventdata.Key
         if get(handles.checkbox1, 'Value') == 1 %if linking xy axes
             ylim = get(handles.axes1, 'YLim'); %get right xlim
             delta=ceil(abs(0.02*diff(ylim)));
-            set(handles.axes1, 'YLim', ylim-delta); %set y-axes of right image
-            set(handles.axes2, 'YLim', ylim-delta); %set y-axes of right image
+            if ylim(1)-delta<0
+                delta=ylim(1)-0.5;
+                set(handles.axes1, 'YLim', ylim-delta); %set y-axes of right image
+                set(handles.axes2, 'YLim', ylim-delta); %set y-axes of right image
+            else
+                set(handles.axes1, 'YLim', ylim-delta); %set y-axes of right image
+                set(handles.axes2, 'YLim', ylim-delta); %set y-axes of right image
+            end
             pushbutton1_Callback(handles.pushbutton1, [], handles);
         else
             errordlg('Data must be linked in the XY for keyboard shortcut','ModLayer Error')
         end
     case 'downarrow'
         if get(handles.checkbox1, 'Value') == 1 %if linking xy axes
-            ylim = get(handles.axes1, 'YLim'); %get right xlim
+            s1=handles.size1; %store the size of the reference image
+            s2=handles.size2; %store the size of data_modify
+            smax=max(s1, s2);
+            ylim = get(handles.axes1, 'YLim'); %get right ylim
             delta=ceil(abs(0.02*diff(ylim)));
-            set(handles.axes1, 'YLim', ylim+delta); %set y-axes of right image
-            set(handles.axes2, 'YLim', ylim+delta); %set y-axes of right image
+            if ylim(2)+delta > smax(1)
+                delta=smax(1)-ylim(2)+0.5;
+                set(handles.axes1, 'YLim', ylim+delta); %set y-axes of right image
+                set(handles.axes2, 'YLim', ylim+delta); %set y-axes of right image
+            else
+                set(handles.axes1, 'YLim', ylim+delta); %set y-axes of right image
+                set(handles.axes2, 'YLim', ylim+delta); %set y-axes of right image
+            end
             pushbutton1_Callback(handles.pushbutton1, [], handles);
         else
             errordlg('Data must be linked in the XY for keyboard shortcut','ModLayer Error')
@@ -928,19 +971,34 @@ switch eventdata.Key
         if get(handles.checkbox1, 'Value') == 1 %if linking xy axes
             xlim = get(handles.axes1, 'XLim'); %get left xlim
             delta=ceil(abs(0.02*diff(xlim)));
-            set(handles.axes1, 'XLim', xlim-delta); %set x-axes of left image
-            set(handles.axes2, 'XLim', xlim-delta); %set x-axes of left image
-            pushbutton1_Callback(handles.pushbutton1, [], handles);
+            if xlim(1)-delta < 0
+                delta=xlim(1)-0.5;
+                set(handles.axes1, 'XLim', xlim-delta); %set x-axes of left image
+                set(handles.axes2, 'XLim', xlim-delta); %set x-axes of left image
+            else
+                set(handles.axes1, 'XLim', xlim-delta); %set x-axes of left image
+                set(handles.axes2, 'XLim', xlim-delta); %set x-axes of left image
+                pushbutton1_Callback(handles.pushbutton1, [], handles);
+            end
         else
             errordlg('Data must be linked in the XY for keyboard shortcut','ModLayer Error')
         end
     case 'rightarrow'
         if get(handles.checkbox1, 'Value') == 1 %if linking xy axes
+            s1=handles.size1; %store the size of the reference image
+            s2=handles.size2; %store the size of data_modify
+            smax=max(s1, s2);
             xlim = get(handles.axes1, 'XLim'); %get left xlim
             delta=ceil(abs(0.02*diff(xlim)));
-            set(handles.axes1, 'XLim', xlim+delta); %set x-axes of left image
-            set(handles.axes2, 'XLim', xlim+delta); %set x-axes of left image
-            pushbutton1_Callback(handles.pushbutton1, [], handles);
+            if xlim(2)+delta > smax(2) %if trying to pan further than the right
+                delta=smax(2)-xlim(2)+0.5;
+                set(handles.axes1, 'XLim', xlim+delta); %set x-axes of left image to max
+                set(handles.axes2, 'XLim', xlim+delta); %set x-axes of left image
+            else
+                set(handles.axes1, 'XLim', xlim+delta); %set x-axes of left image
+                set(handles.axes2, 'XLim', xlim+delta); %set x-axes of left image
+                pushbutton1_Callback(handles.pushbutton1, [], handles);
+            end
         else
             errordlg('Data must be linked in the XY for keyboard shortcut','ModLayer Error')
         end

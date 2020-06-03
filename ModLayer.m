@@ -1006,7 +1006,9 @@ switch eventdata.Key
         end
     case 'r'
         set(handles.popupmenu3, 'Value', 1);
+        pushbutton1_Callback(handles.pushbutton1, [], handles); %update
     case 'l'
         set(handles.popupmenu3, 'Value', 2);
+        pushbutton1_Callback(handles.pushbutton1, [], handles); %update
 end
 

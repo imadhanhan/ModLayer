@@ -33,6 +33,8 @@
 %   	Up Arrow                pan up
 %   	Down Arrow              pan down
 %   	Backslash         \     modify
+%       r                 r     draw on right image
+%       l                 l     draw on left image
 %
 %-----------------------------------------------------------------------------
 % 
@@ -1002,5 +1004,9 @@ switch eventdata.Key
         else
             errordlg('Data must be linked in the XY for keyboard shortcut','ModLayer Error')
         end
+    case 'r'
+        set(handles.popupmenu3, 'Value', 1);
+    case 'l'
+        set(handles.popupmenu3, 'Value', 2);
 end
 

@@ -1,5 +1,7 @@
 # ModLayer
 
+Latest update: 06/03/2020
+
 If you use this tool and your work results in a publication, please cite as:
 
 Hanhan, I. & Sangid, M.D. Integr Mater Manuf Innov (2019). https://doi.org/10.1007/s40192-019-00160-5
@@ -20,16 +22,16 @@ ModLayer Kyboard Shortcuts:
 
 •	Keyboard shortcuts:
 
-    o	Plus Sign ( + ): zoom in
-    
-    o	Hyphen ( - ): zoom out
-    
-    o	Page Up: Scroll to next slice
-    
-    o	Page Down: Scroll to previous slice
-    
-    o	Arrows: Pan left, right, up, or down
-    
-    o	Backslash ( \ ): Modify
+   	Plus Sign         +     zoom in
+   	Hyphen            -     zoom out
+   	Page Up         pagup   scroll to next slice
+   	Page Down      pagdown  scroll to previous slice
+   	Left Arrow              pan left
+   	Right Arrow             pan right
+   	Up Arrow                pan up
+   	Down Arrow              pan down
+   	Backslash         \     modify
+    r                 r     draw on right image
+    l                 l     draw on left image
     
 •	To zoom out to the full view, press and hold the hyphen key ‘-’

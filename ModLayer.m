@@ -87,10 +87,10 @@ set(handles.uipanel1,'ForegroundColor', [0.6350 0.0780 0.1840], 'ShadowColor',[0
 
 z=1; %intializes as slice = first slice for visualizaing both datasets
 
-handles.data1min=min(data1(:));
-handles.data2min=min(data_modify(:));
-handles.data1max=max(data1(:));
-handles.data2max=max(data_modify(:));
+handles.data1min=double(min(data1(:)));
+handles.data2min=double(min(data_modify(:)));
+handles.data1max=double(max(data1(:)));
+handles.data2max=double(max(data_modify(:)));
 handles.undoslicenumber=1;
 handles.undoslice=data_modify(:,:,1);
 
@@ -446,7 +446,7 @@ if popmv4 == 1 %user is in single mode
     if axes_number==2
         %bring text box with instructions
         set(handles.text17, 'Visible', 'on','String', ['Draw on the left image to impose a multi-class segmentation value of ', get(handles.edit1,'String'), ' on the right image. To cancel, press Esc.']);
-        hFH = imfreehand(handles.axes1); %tasks user to free hand on axes1
+        hFH = imfreehand(handles.axes1, 'Closed',0); %tasks user to free hand on axes1
     elseif axes_number==1
         %bring text box with instructions
         set(handles.text17, 'Visible', 'on','String', ['Draw on the right image to impose a multi-class segmentation value of ', get(handles.edit1,'String'), ' on the right image. To cancel, press Esc.']);

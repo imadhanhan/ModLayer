@@ -94,6 +94,19 @@ handles.data2max=double(max(data_modify(:)));
 handles.undoslicenumber=1;
 handles.undoslice=data_modify(:,:,1);
 
+%check if images are only one value, if so update max for clim:
+if and( handles.data1min==handles.data1max , handles.data1min==0) %if min and max are equal, and min =0
+    handles.data1max=1; %change max to one
+elseif and( handles.data1min==handles.data1max , handles.data1min>0) %if min and max are equal, and min>0
+    handles.data1min=0;
+end
+
+if and( handles.data2min==handles.data2max , handles.data2min==0) %if min and max are equal, and min =0
+    handles.data2max=1; %change max to one
+elseif and( handles.data2min==handles.data2max , handles.data2min>0)%if min and max are equal, and min>0
+    handles.data2min=0;
+end
+
 imagesc(handles.axes1, data1(:,:,z)); %visualize data1
 caxis(  handles.axes1, [handles.data1min handles.data1max]);
 colormap(handles.axes1, 'gray') %set the colormap for data1 as gray
@@ -1012,3 +1025,108 @@ switch eventdata.Key
         pushbutton1_Callback(handles.pushbutton1, [], handles); %update
 end
 
+
+
+% --- Executes on button press in pushbutton5. This saves data.
+function pushbutton5_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global data_modify
+s2=handles.size2; %store the size of data_modify
+filter={'*.h5'; '*.tif'};
+[file,path]=uiputfile(filter, ' Save data_modify data', 'data_modify.h5');
+
+% Check which file type the user has chosen:
+if file==0
+    %do nothing
+elseif file(end-2:end)=='.h5'
+type_of_data=class(data_modify);
+    
+h5create([path,file],'/data_modify',s2);
+h5write([path, file],'/data_modify',data_modify);
+xdmfwrite_ML(path,file,s2,type_of_data);
+
+elseif file(end-3:end)=='.tif' %user wants tiff images
+    for i=1:s2(3)
+        imwrite(data_modify(:,:,i), [path, file(1:end-4), '_', num2str(i),'.tif']);
+    end
+end
+ 
+f=msgbox('data_modify has been saved');
+
+    
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over pushbutton5.
+function pushbutton5_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to pushbutton5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+function xdmf_ML = xdmfwrite_ML(path,filename,size,datatype)
+%XDMFWRITE  Create an XDMF text file for an associated 3D H5 file.
+%   XDMFWRITE(FILENAME,SIZE,DATATYPE) creates an
+%   XDMF file with 3D extents given by SIZE and with attribute datasets
+%   given by the h5 FILENAME with the datatype specified by DATATYPE. 
+%   If DATATYPE is not specified, the default is double.
+%
+%   Example:  create an XDMF file for 'myfile.h5' that contains a
+%   fixed-size 100x200x300 dataset.
+%      xdmfwrite('myfile.h5',[100 200 300],'double');
+%
+%   Example:  create an XDMF file for a 3D matrix of ones in single single
+%   precision with a fized-size of 100x200x300.
+%       mydata=single(ones(100,200,300));
+%       h5create('myfile.h5','/myDataset',size(mydata), 'Datatype','single');
+%       h5write('myfile.h5','/myDataset', mydata);
+%       xdmfwrite('myfile.h5',size(mydata),'single');
+%
+%   Written by Imad Hanhan, 2019.
+
+
+fileinfo=h5info([path, filename]);
+totalsets=length(fileinfo.Datasets);
+
+
+%Check if datatype is given:
+if exist('datatype', 'var')==0
+    datatype='double';
+end
+
+% Write the XDMF file
+xdmf_ML = fopen([path, filename(1:end-3), '.xdmf'], 'w');
+
+fprintf(xdmf_ML, '%s\n', '<?xml version="1.0"?>');
+fprintf(xdmf_ML, '%s\n', '<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd"[]>');
+fprintf(xdmf_ML, '%s\n', '<Xdmf xmlns:xi="http://www.w3.org/2003/XInclude" Version="2.2">');
+fprintf(xdmf_ML, '%s\n', ' <Domain>');
+fprintf(xdmf_ML, '%s\n', ' ');
+fprintf(xdmf_ML, '%s\n', '  <Grid Name="Cell Data" GridType="Uniform">');
+fprintf(xdmf_ML, '%s\n', ['    <Topology TopologyType="3DCoRectMesh" Dimensions="',num2str(size(3)+1), ' ', num2str(size(2)+1), ' ', num2str(size(1)+1), '"></Topology>']);
+fprintf(xdmf_ML, '%s\n', '    <Geometry Type="ORIGIN_DXDYDZ">');
+fprintf(xdmf_ML, '%s\n', '      <!-- Origin -->');
+fprintf(xdmf_ML, '%s\n', '      <DataItem Format="XML" Dimensions="3">0 0 0</DataItem>');
+fprintf(xdmf_ML, '%s\n', '      <!-- DxDyDz (Spacing/Resolution)-->');
+fprintf(xdmf_ML, '%s\n', '      <DataItem Format="XML" Dimensions="3">1 1 1</DataItem>');
+fprintf(xdmf_ML, '%s\n', '    </Geometry>');
+
+for i = 1: totalsets
+    fprintf(xdmf_ML, '%s\n', ' ');
+    fprintf(xdmf_ML, '%s\n', ['      <Attribute Name="', fileinfo.Datasets(i).Name, '" AttributeType="Scalar" Center="Cell">']);
+    fprintf(xdmf_ML, '%s\n', ['      <DataItem Format="HDF" Dimensions="',num2str(size(3)), ' ', num2str(size(2)), ' ', num2str(size(1)), '" NumberType="', datatype, '" Precision="4" >']);
+    fprintf(xdmf_ML, '%s\n', ['       ',filename, ':/',fileinfo.Datasets(i).Name ]);
+    fprintf(xdmf_ML, '%s\n', '      </DataItem>');
+    fprintf(xdmf_ML, '%s\n', '       </Attribute>');
+    fprintf(xdmf_ML, '%s\n', ' ');
+end
+
+fprintf(xdmf_ML, '%s\n', '  </Grid>');
+fprintf(xdmf_ML, '%s\n', '    <!-- *************** END OF Cell Data *************** -->');
+fprintf(xdmf_ML, '%s\n', ' ');
+fprintf(xdmf_ML, '%s\n', ' </Domain>');
+fprintf(xdmf_ML, '%s\n', '</Xdmf>');
+
+fclose(xdmf_ML);

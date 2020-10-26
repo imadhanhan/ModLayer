@@ -1,6 +1,6 @@
 # ModLayer
 
-Latest update: 10/23/2020
+Latest update: 10/26/2020
 
 If you use this tool and your work results in a publication, please cite as:
 
